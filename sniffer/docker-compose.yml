@@ -1,0 +1,68 @@
+version: "3.8"
+
+services:
+
+  
+
+  mosquitto:
+    image: eclipse-mosquitto
+    container_name: mosquitto
+    ports:
+      - "1883:1883"
+    volumes:
+      - ../brokers/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+
+  emqx:
+    image: emqx/emqx
+    container_name: emqx
+    ports:
+      - "1884:1883"
+
+  hivemq:
+    image: hivemq/hivemq-ce
+    container_name: hivemq
+    ports:
+      - "1885:1883"
+
+  nanomq:
+    image: emqx/nanomq
+    container_name: nanomq
+    ports:
+      - "1886:1883"
+
+  
+
+  philips:
+    build: ../devices/philips
+    depends_on:
+      - mosquitto
+
+  raspberry:
+    build: ../devices/raspberry_pi
+    depends_on:
+      - mosquitto
+
+  xiaomi:
+    build: ../devices/xiaomi
+    depends_on:
+      - emqx
+
+  lg:
+    build: ../devices/lg_fridge
+    depends_on:
+      - hivemq
+
+  sonoff:
+    build: ../devices/sonoff
+    depends_on:
+      - nanomq
+
+
+  sniffer:
+    build: .
+    container_name: mqtt-sniffer
+    network_mode: "host"
+    volumes:
+      - ../captures:/captures
+    command: >
+      sh -c "tcpdump -i any port 1883 -w /captures/mqtt_capture.pcap"
