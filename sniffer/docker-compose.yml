@@ -5,7 +5,7 @@ services:
   
 
   mosquitto:
-    image: eclipse-mosquitto
+    image: eclipse-mosquitto:2
     container_name: mosquitto
     ports:
       - "1883:1883"
@@ -13,50 +13,140 @@ services:
       - ../brokers/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
 
   emqx:
-    image: emqx/emqx
+    image: emqx/emqx:5.8
     container_name: emqx
     ports:
       - "1884:1883"
 
   hivemq:
-    image: hivemq/hivemq-ce
+    image: hivemq/hivemq-ce:latest
     container_name: hivemq
     ports:
       - "1885:1883"
 
-  nanomq:
-    image: emqx/nanomq
-    container_name: nanomq
-    ports:
-      - "1886:1883"
-
   
 
-  philips:
+  philips_mosquitto:
     build: ../devices/philips
+    environment:
+      - BROKER=mosquitto
+      - DEVICE_VERSION=v1
     depends_on:
       - mosquitto
 
-  raspberry:
-    build: ../devices/raspberry_pi
-    depends_on:
-      - mosquitto
-
-  xiaomi:
-    build: ../devices/xiaomi
+    
+  philips_emqx:
+    build: ../devices/philips
+    environment:
+      - BROKER=emqx
+      - DEVICE_VERSION=v2
     depends_on:
       - emqx
 
-  lg:
-    build: ../devices/lg_fridge
+  philips_hivemq:
+    build: ../devices/philips
+    environment:
+      - BROKER=hivemq
+      - DEVICE_VERSION=v3
     depends_on:
       - hivemq
 
-  sonoff:
-    build: ../devices/sonoff
+  lg_mosquitto:
+    build: ../devices/lg_fridge
+    environment:
+      - BROKER=mosquitto
+      - DEVICE_VERSION=v1
     depends_on:
-      - nanomq
+      - mosquitto
 
+
+  lg_emqx:
+    build: ../devices/lg_fridge
+    environment:
+      - BROKER=emqx
+      - DEVICE_VERSION=v2
+    depends_on:
+      - emqx
+
+  lg_hivemq:
+    build: ../devices/lg_fridge
+    environment:
+      - BROKER=hivemq
+      - DEVICE_VERSION=v3
+    depends_on:
+      - hivemq
+
+  raspberry_mosquitto:
+    build: ../devices/raspberry_pi
+    environment:
+      - BROKER=mosquitto
+      - DEVICE_VERSION=v1
+    depends_on:
+      - mosquitto
+    
+  raspberry_emqx:
+    build: ../devices/raspberry_pi
+    environment:
+      - BROKER=emqx
+      - DEVICE_VERSION=v2
+    depends_on:
+      - emqx
+
+  raspberry_hivemq:
+    build: ../devices/raspberry_pi
+    environment:
+      - BROKER=hivemq
+      - DEVICE_VERSION=v3
+    depends_on:
+      - hivemq
+
+  sonoff_mosquitto:
+    build: ../devices/sonoff
+    environment:
+      - BROKER=mosquitto
+      - DEVICE_VERSION=v1
+    depends_on:
+      - mosquitto
+
+  sonoff_emqx:
+    build: ../devices/sonoff
+    environment:
+      - BROKER=emqx
+      - DEVICE_VERSION=v2
+    depends_on:
+      - emqx
+
+  sonoff_hivemq:
+    build: ../devices/sonoff
+    environment:
+      - BROKER=hivemq
+      - DEVICE_VERSION=v3
+    depends_on:
+      - hivemq
+
+  xiaomi_mosquitto:
+    build: ../devices/xiaomi
+    environment:
+      - BROKER=mosquitto
+      - DEVICE_VERSION=v1
+    depends_on:
+      - mosquitto
+
+  xiaomi_emqx:
+    build: ../devices/xiaomi
+    environment:
+      - BROKER=emqx
+      - DEVICE_VERSION=v2
+    depends_on:
+      - emqx
+
+  xiaomi_hivemq:
+    build: ../devices/xiaomi
+    environment:
+      - BROKER=hivemq
+      - DEVICE_VERSION=v3
+    depends_on:
+      - hivemq
 
   sniffer:
     build: .
@@ -65,4 +155,4 @@ services:
     volumes:
       - ../captures:/captures
     command: >
-      sh -c "tcpdump -i any port 1883 -w /captures/mqtt_capture.pcap"
+      sh -c "tcpdump -i any port 1883 -U -w /captures/mqtt_capture.pcap"

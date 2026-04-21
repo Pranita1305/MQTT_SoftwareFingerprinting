@@ -1,15 +1,31 @@
-import time, json, random
+
+import json
+import os
+import random
+import time
+
 import paho.mqtt.client as mqtt
 
-client = mqtt.Client("xiaomi_miot")
-client.connect("emqx", 1883, 60)
+
+BROKER = os.getenv("BROKER", "emqx")
+DEVICE_VERSION = os.getenv("DEVICE_VERSION", "v1")
+
+client_id = f"xiaomi_{BROKER}_{DEVICE_VERSION}"
+client = mqtt.Client(client_id)
+client.connect(BROKER, 1883, 60)
+
+
 
 while True:
     payload = {
         "id": random.randint(1000, 9999),
         "method": "set_power",
-        "params": [random.choice(["on", "off"])]
+        "params": [random.choice(["on", "off"])],
+        "device_version": DEVICE_VERSION,
+        "broker": BROKER,
     }
-    client.publish("miot/device/control", json.dumps(payload), qos=0)
-    print("Xiaomi:", payload)
+    
+    topic = f"miot/{BROKER}/{DEVICE_VERSION}/device/control"
+    client.publish(topic, json.dumps(payload), qos=0)
+    print(f"Xiaomi[{DEVICE_VERSION}] -> {BROKER}:", payload)
     time.sleep(4)
