@@ -1,7 +1,7 @@
 import csv
 import json
 import os
-import subprocess
+
 import pyshark
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -56,17 +56,18 @@ for packet in capture:
         topic = str(mqtt.topic) if hasattr(mqtt, "topic") else ""
         qos = int(mqtt.qos) if hasattr(mqtt, "qos") else 0
         payload = str(mqtt.msg) if hasattr(mqtt, "msg") else ""
-        msg_type = int(mqtt.msgtype) if hasattr(mqtt, "msgtype") else -1
+        
 
         row = {
             "topic": topic,
             "device": detect_device(topic, payload),
             "device_version": extract_version(payload),
             "broker": extract_broker(topic),
+            "payload_len": len(payload),
+            "msg_type": int(mqtt.msgtype) if hasattr(mqtt, "msgtype") else -1,
             "qos": qos,
             "payload_type": payload_type(payload),
-            "payload_len": len(payload),
-            "msg_type": msg_type,
+            
         }
 
         dataset.append(row)
@@ -81,10 +82,10 @@ fieldnames = [
     "device",
     "device_version",
     "broker",
-    "qos",
-    "payload_type",
     "payload_len",
     "msg_type",
+    "qos",
+    "payload_type",
 ]
 
 with open(csv_path, "w", newline="") as f:

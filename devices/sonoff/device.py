@@ -20,7 +20,8 @@ client.connect(BROKER, 1883, 60)
 while True:
    
     payload = {
-        "state": random.choice(["ON", "OFF"]),
+        "state": "ON",
+        "switch_state": random.choice(["ON", "OFF"]),
         "device_version": DEVICE_VERSION,
         "broker": BROKER,
     }
@@ -28,4 +29,10 @@ while True:
     topic = f"sonoff/{BROKER}/{DEVICE_VERSION}/power"
     client.publish(topic, json.dumps(payload), qos=1)
     print(f"Sonoff[{DEVICE_VERSION}] -> {BROKER}:", payload)
-    time.sleep(2)
+    if DEVICE_VERSION == "v1":
+        delay = 2
+    elif DEVICE_VERSION == "v2":
+        delay = 5
+    else:
+        delay = 3
+    time.sleep(delay)

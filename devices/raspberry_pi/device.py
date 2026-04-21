@@ -17,6 +17,7 @@ client.connect(BROKER, 1883, 60)
 
 while True:
     payload = {
+        "state": "ON",
         "temperature": round(random.uniform(20, 30), 2),
         "humidity": round(random.uniform(40, 70), 2),
         "device_version": DEVICE_VERSION,
@@ -26,4 +27,10 @@ while True:
     topic = f"sensor/{BROKER}/{DEVICE_VERSION}/pi"
     client.publish(topic, json.dumps(payload), qos=1)
     print(f"RaspberryPi[{DEVICE_VERSION}] -> {BROKER}:", payload)
-    time.sleep(5)
+    if DEVICE_VERSION == "v1":
+        delay = 2
+    elif DEVICE_VERSION == "v2":
+        delay = 5
+    else:
+        delay = 3
+    time.sleep(delay)

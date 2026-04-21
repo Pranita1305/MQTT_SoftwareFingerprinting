@@ -18,7 +18,7 @@ client.connect(BROKER, 1883, 60)
 
 while True:
     payload = {
-        "state": random.choice(["ON", "OFF"]),
+        "state": "ON",
         "brightness": random.randint(0, 100),
         "device_version": DEVICE_VERSION,
         "broker": BROKER,
@@ -27,4 +27,10 @@ while True:
     topic = f"hue/{BROKER}/{DEVICE_VERSION}/light"
     client.publish(topic, json.dumps(payload), qos=0)
     print(f"Philips[{DEVICE_VERSION}] -> {BROKER}:", payload)
-    time.sleep(3)
+    if DEVICE_VERSION == "v1":
+        delay = 2
+    elif DEVICE_VERSION == "v2":
+        delay = 5
+    else:
+        delay = 3
+    time.sleep(delay)

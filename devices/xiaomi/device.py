@@ -18,6 +18,7 @@ client.connect(BROKER, 1883, 60)
 
 while True:
     payload = {
+        "state": "ON",
         "id": random.randint(1000, 9999),
         "method": "set_power",
         "params": [random.choice(["on", "off"])],
@@ -28,4 +29,10 @@ while True:
     topic = f"miot/{BROKER}/{DEVICE_VERSION}/device/control"
     client.publish(topic, json.dumps(payload), qos=0)
     print(f"Xiaomi[{DEVICE_VERSION}] -> {BROKER}:", payload)
-    time.sleep(4)
+    if DEVICE_VERSION == "v1":
+        delay = 2
+    elif DEVICE_VERSION == "v2":
+        delay = 5
+    else:
+        delay = 3
+    time.sleep(delay)
